@@ -12,7 +12,7 @@
 		07912A8F1E7DF53500304795 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 07912A8D1E7DF53500304795 /* Main.storyboard */; };
 		07912A911E7DF53500304795 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 07912A901E7DF53500304795 /* Assets.xcassets */; };
 		07912A941E7DF53500304795 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 07912A921E7DF53500304795 /* LaunchScreen.storyboard */; };
-		DD826C1A947A027C3640EB6C /* libPods-teleporter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 13AA42C4024BB468C05D53A1 /* libPods-teleporter.a */; };
+		A9B7E7D0A98464F6357D98E6 /* Pods_teleporter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DC46FE94E206CEFC802B8F7 /* Pods_teleporter.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,7 +23,7 @@
 		07912A901E7DF53500304795 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		07912A931E7DF53500304795 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		07912A951E7DF53500304795 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		13AA42C4024BB468C05D53A1 /* libPods-teleporter.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-teleporter.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1DC46FE94E206CEFC802B8F7 /* Pods_teleporter.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_teleporter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E9CEAAD15F138C0AD9D1ADF /* Pods-teleporter.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-teleporter.debug.xcconfig"; path = "Pods/Target Support Files/Pods-teleporter/Pods-teleporter.debug.xcconfig"; sourceTree = "<group>"; };
 		6AB935C510591CA7F8E98904 /* Pods-teleporter.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-teleporter.release.xcconfig"; path = "Pods/Target Support Files/Pods-teleporter/Pods-teleporter.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -33,7 +33,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DD826C1A947A027C3640EB6C /* libPods-teleporter.a in Frameworks */,
+				A9B7E7D0A98464F6357D98E6 /* Pods_teleporter.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,7 +74,7 @@
 		49D88DA46A555CF1EF47ACC0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				13AA42C4024BB468C05D53A1 /* libPods-teleporter.a */,
+				1DC46FE94E206CEFC802B8F7 /* Pods_teleporter.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
