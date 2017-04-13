@@ -9,6 +9,23 @@ import Mapbox
 import MapboxGeocoder
 import UIKit
 
+extension CLLocationCoordinate2D {
+    init(random _: Any?) {
+        // arc4random_uniform() takes UInt32, so it's necessary to convert to positive numbers, then subtract when we're done to get back where we started.
+        let offsetLatitude = abs(-90) // effectively the minimum latitude
+        let maximumLatitude = 90 + offsetLatitude
+        
+        let offsetLongitude = abs(-180) // effectively the minimum longitude
+        let maximumLongitude = 180 + offsetLongitude // 180 + offset
+        
+        let latitude = Int(arc4random_uniform(UInt32(maximumLatitude))) - offsetLatitude
+        let longitude = Int(arc4random_uniform(UInt32(maximumLongitude))) - offsetLongitude
+        
+        self.latitude = Double(latitude)
+        self.longitude = Double(longitude)
+    }
+}
+
 class ViewController: UIViewController, MGLMapViewDelegate {
     let geocoder = Geocoder.shared
 
@@ -24,10 +41,13 @@ class ViewController: UIViewController, MGLMapViewDelegate {
     }
     
     @IBAction func teleportToLocation(_ sender: UIButton) {
+        
+        let randomCoordinate = CLLocationCoordinate2D(random: true)
+        
         guard mapDidFinishLoading == true else { return }
         
         let annotation = MGLPointAnnotation()
-        annotation.coordinate = CLLocationCoordinate2D(latitude: 38.897435, longitude: -77.039679)
+        annotation.coordinate = randomCoordinate
         mapView.addAnnotation(annotation)
         
         let camera = mapView.camera
@@ -48,15 +68,11 @@ class ViewController: UIViewController, MGLMapViewDelegate {
         }
 
     }
-    
-    
-   
 
     
     func mapViewDidFinishLoadingMap(_ mapView: MGLMapView) {
         mapDidFinishLoading = true
     }
-    
     
 }
 
