@@ -7,28 +7,14 @@
 //
 import Mapbox
 import MapboxGeocoder
+import MapboxDirections
+import MapboxNavigation
 import UIKit
 
-extension CLLocationCoordinate2D {
-    init(random _: Any?) {
-        // arc4random_uniform() takes UInt32, so it's necessary to convert to positive numbers, then subtract when we're done to get back where we started.
-        let offsetLatitude = abs(-90) // effectively the minimum latitude
-        let maximumLatitude = 90 + offsetLatitude
-        
-        let offsetLongitude = abs(-180) // effectively the minimum longitude
-        let maximumLongitude = 180 + offsetLongitude // 180 + offset
-        
-        let latitude = Int(arc4random_uniform(UInt32(maximumLatitude))) - offsetLatitude
-        let longitude = Int(arc4random_uniform(UInt32(maximumLongitude))) - offsetLongitude
-        
-        self.latitude = Double(latitude)
-        self.longitude = Double(longitude)
-    }
-}
-
 class ViewController: UIViewController, MGLMapViewDelegate {
+    
     let geocoder = Geocoder.shared
-
+    var route: Route?
     @IBOutlet var mapView: MGLMapView!
     @IBOutlet weak var placeName: UILabel!
     
@@ -38,41 +24,70 @@ class ViewController: UIViewController, MGLMapViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let recognizer = UILongPressGestureRecognizer(target: self, action: #selector(didLongPress(_:)))
+        mapView.addGestureRecognizer(recognizer)
     }
     
-    @IBAction func teleportToLocation(_ sender: UIButton) {
+    // Set up a long press gesture reconizer that creates and annotation
+    // and reverse geocodes the point at which the long press occurs
+    // on the map view
+    func didLongPress(_ sender: UILongPressGestureRecognizer) {
+        guard sender.state == .began else { return }
         
-        let randomCoordinate = CLLocationCoordinate2D(random: true)
-        
-        guard mapDidFinishLoading == true else { return }
+        let point = sender.location(in: mapView)
+        let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
         
         let annotation = MGLPointAnnotation()
-        annotation.coordinate = randomCoordinate
+        annotation.coordinate = coordinate
+        
         mapView.addAnnotation(annotation)
         
-        let camera = mapView.camera
-        
-        camera.centerCoordinate = annotation.coordinate
-        camera.altitude = 20000
-        mapView.setCamera(camera, animated: true)
-        
-        let options = ReverseGeocodeOptions(coordinate: annotation.coordinate)
-        
-        _ = geocoder.geocode(options) { [weak self] (placemarks, attribution, error) in
-            guard let strongSelf = self else { return }
-            guard let placemark = placemarks?.first else {
+        //reverseGeocode(coordinate: annotation.coordinate)
+        reverseGeocode(coordinate: annotation.coordinate) { (postalAddress) in
+            let formatter = CNPostalAddressFormatter()
+            guard let postalAddress = postalAddress else {
+                self.placeName.text = "Not found"
+                //completion(nil)
                 return
             }
             
-            strongSelf.placeName.text = placemark.administrativeRegion?.name ?? "Not found"
+            self.placeName.text = formatter.string(from: postalAddress)
+    
         }
-
     }
-
+    
+    @IBAction func removeAnnotations(_ sender: UIButton) {
+        guard mapDidFinishLoading == true else { return }
+        
+        guard let annotations = mapView.annotations else { return }
+        mapView.removeAnnotations(annotations)
+    }
     
     func mapViewDidFinishLoadingMap(_ mapView: MGLMapView) {
         mapDidFinishLoading = true
+        // call reverGeocode
     }
     
+    func test() {
+        
+    }
+    // Reverse geocode
+    func reverseGeocode(coordinate: CLLocationCoordinate2D,
+                        completion: @escaping (CNPostalAddress?) -> ()) {
+        let options = ReverseGeocodeOptions(coordinate: coordinate) // 1 main thread
+        
+        _ = geocoder.geocode(options) {(placemarks, attribution, error) in // 2 background thread
+            // 4
+            guard let placemark = placemarks?.first else {
+                print("Couldn't find this place")
+                completion(nil)
+                return
+            }
+            completion(placemark.postalAddress)
+            
+        }
+        print("")
+        // 3
+    }
 }
-
