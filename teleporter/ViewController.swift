@@ -5,11 +5,13 @@
 //  Created by Nadia Barbosa on 3/18/17.
 //  Copyright © 2017 Nadia Barbosa. All rights reserved.
 //
+
+import UIKit
+import MapboxCoreNavigation
+import MapboxNavigation
+import MapboxDirections
 import Mapbox
 import MapboxGeocoder
-import MapboxDirections
-import MapboxNavigation
-import UIKit
 
 class ViewController: UIViewController, MGLMapViewDelegate {
     
@@ -123,12 +125,19 @@ class ViewController: UIViewController, MGLMapViewDelegate {
             completion(route, error)
         }
     }
+
     
     // Present the navigation view controller
     func presentNavigation(along route: Route) {
-      let viewController = NavigationViewController(for: route)
-      viewController.simulatesLocationUpdates = true
+        // Quick fix to simulate route
+      let x = SimulatedLocationManager(route: route)
+      let viewController = NavigationViewController(for: route, locationManager: x)
+//      viewController.view.tintColor = .red
+        
+//      viewController.simulatesLocationUpdates = true
+//      FloatingButton.appearance().tintColor = .orange
       self.present(viewController, animated: true, completion: nil)
+        
     }
     
     // Reverse geocode sequence
