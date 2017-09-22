@@ -14,15 +14,14 @@ import UIKit
 class ViewController: UIViewController, MGLMapViewDelegate {
     
     var mapView: MGLMapView!
-    var route: Route?
+    var directionsRoute: Route?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         mapView = MGLMapView(frame: view.bounds)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        mapView.showsUserLocation = true
-
+        mapView.userTrackingMode = .follow
         view.addSubview(mapView)
         
         let recognizer = UILongPressGestureRecognizer(target: self, action: #selector(didLongPress(_:)))
@@ -31,7 +30,6 @@ class ViewController: UIViewController, MGLMapViewDelegate {
         // Make sure to set the map view's delegate so we can use delegate methods
         mapView.delegate = self
     }
-    
 
     func didLongPress(_ sender: UILongPressGestureRecognizer) {
         guard sender.state == .began else { return }
@@ -46,19 +44,22 @@ class ViewController: UIViewController, MGLMapViewDelegate {
         annotation.coordinate = coordinate
         annotation.title = "Start navigation"
         mapView.addAnnotation(annotation)
+        mapView.selectAnnotation(annotation, animated: true)
         
         calculateRoute(from: mapView.userLocation!.coordinate, to: annotation.coordinate) { [unowned self] (route, error) in
             if let error = error {
-                // Handle error here, such as
-                // displaying an alert
+                // Handle API / network related errors here
+                let alert = UIAlertController(title: "Error:", message: "\(error.localizedDescription)", preferredStyle: .alert)
+                let okAction = UIAlertAction(title: "OK", style: .default)
+                alert.addAction(okAction)
+                self.present(alert, animated: true, completion: nil)
             }
-            guard let route = route else {
-                // Bail if theres a problem generating the route
+            guard let directionsRoute = route else {
+                // Handle route generation errors
                 return
             }
-            // drawRoute(route: route)
+            self.drawRoute(route: directionsRoute)
         }
-        
     }
     
     // Delegate method: Ensure annotations can show callouts
@@ -77,12 +78,9 @@ class ViewController: UIViewController, MGLMapViewDelegate {
         return button
     }
     
-    // Handle the callout accessory (in this case the button added
-    // in the rightCalloutAccessoryViewFor delegate method)
-    // interaction to start navigation sequence when tapped
-    func mapView(_ mapView: MGLMapView, annotation: MGLAnnotation, calloutAccessoryControlTapped control: UIControl) {
-        
-        self.presentNavigation(along: route)
+    // Handle action that occurs when a callout is tapped
+    func mapView(_ mapView: MGLMapView, tapOnCalloutFor annotation: MGLAnnotation) {
+        self.presentNavigation(along: directionsRoute!)
     }
     
     // Calculate route to be used for navigation
@@ -98,16 +96,32 @@ class ViewController: UIViewController, MGLMapViewDelegate {
         options.includesSteps = true
         
         _ = Directions.shared.calculate(options) { (waypoints, routes, error) in
-            guard let route = routes?.first else {
-                completion(nil, error)
-                return
-            }
-            completion(route, error)
+            guard let route = routes?.first else { return }
+            self.directionsRoute = route
+            self.drawRoute(route: self.directionsRoute!)
         }
     }
     
     func drawRoute(route: Route) {
-        // Here's where you'd add code to draw the route
+        if route.coordinateCount > 0 {
+            // Convert the route’s coordinates into a polyline.
+            var routeCoordinates = route.coordinates!
+            let polyline = MGLPolylineFeature(coordinates: &routeCoordinates, count: route.coordinateCount)
+            
+            // If there's already a route line on the map, reset its shape to the new route
+            if let source = mapView.style?.source(withIdentifier: "route-source") as? MGLShapeSource {
+                source.shape = polyline
+            } else {
+                let source = MGLShapeSource(identifier: "route-source", features: [polyline], options: nil)
+                let lineStyle = MGLLineStyleLayer(identifier: "route-style", source: source)
+                lineStyle.lineColor = MGLStyleValue(rawValue: .red)
+                lineStyle.lineWidth = MGLStyleValue(rawValue: 3)
+                
+                mapView.style?.addSource(source)
+                mapView.style?.addLayer(lineStyle)
+                
+            }
+        }
     }
     
     // Present the navigation view controller
@@ -115,5 +129,4 @@ class ViewController: UIViewController, MGLMapViewDelegate {
       let viewController = NavigationViewController(for: route)
       self.present(viewController, animated: true, completion: nil)
     }
-
 }
